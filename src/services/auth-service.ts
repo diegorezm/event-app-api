@@ -22,7 +22,7 @@ class AuthService {
     }
     payload.password = passwordHash;
     const [user] = await db.insert(userTableSchema).values(payload).returning();
-    return user;
+    return user as User;
   }
 
   async login(payload: UserLoginDTO) {

@@ -5,14 +5,13 @@ import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 import { ZodError } from "zod";
 import { NODE_ENV } from "./env";
+import authRoutes from "./routes/auth-routes";
 
 const app = new Hono();
 
 app.use(logger());
 
-app.get("/", (c) => {
-  return c.text("Hello Hono!");
-});
+app.route("/auth", authRoutes);
 
 app.onError((err, c) => {
   if (NODE_ENV === "dev") {
