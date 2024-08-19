@@ -1,14 +1,29 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
+    "target": "ES2022",
+    "declaration": true,
     "moduleResolution": "Bundler",
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true,
+    "skipLibCheck": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "types": [
-      "node"
+      "node",
+      "vitest/globals"
     ],
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
-  }
+    "jsx": "react",
+    "jsxFactory": "jsx",
+    "jsxFragmentFactory": "Fragment",
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.mts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ],
 }
+

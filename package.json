@@ -1,7 +1,13 @@
 {
   "name": "event-app-api",
+  "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "start": "NODE_ENV=production tsx src/index.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "bun run server/db/seed.ts",
+    "db:drop": "drizzle-kit drop"
   },
   "dependencies": {
     "@hono/node-server": "^1.12.1",
@@ -10,13 +16,18 @@
     "drizzle-orm": "^0.33.0",
     "drizzle-zod": "^0.5.1",
     "hono": "^4.5.6",
+    "jsonwebtoken": "^9.0.2",
     "pg": "^8.12.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^20.11.17",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20.16.1",
     "@types/pg": "^8.11.6",
     "drizzle-kit": "^0.24.0",
-    "tsx": "^4.7.1"
+    "esbuild": "^0.23.1",
+    "esbuild-plugin-tsc": "^0.4.0",
+    "tsx": "^4.7.1",
+    "typescript": "^5.5.4"
   }
 }
