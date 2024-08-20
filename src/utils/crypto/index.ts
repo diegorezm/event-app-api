@@ -1,7 +1,6 @@
 // from: https://dev.to/vapourisation/east-encryption-in-typescript-3948
 import * as crypto from "crypto";
-import { CRYPTO_KEY } from "../../env";
-
+import { CRYPTO_KEY, DB_URL } from "../../env";
 function splitEncryptedText(encryptedText: string) {
   return {
     ivString: encryptedText.slice(0, 32),
@@ -15,7 +14,8 @@ class Crypto {
   encrypt(plaintext: string) {
     try {
       const iv = crypto.randomBytes(16);
-      const cipher = crypto.createCipheriv("aes-256-cbc", CRYPTO_KEY, iv);
+      const key = crypto.createHash("sha256").update(CRYPTO_KEY).digest();
+      const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
 
       const encrypted = Buffer.concat([
         cipher.update(plaintext, "utf-8"),
@@ -34,8 +34,8 @@ class Crypto {
     try {
       const iv = Buffer.from(ivString, this.encoding);
       const encryptedText = Buffer.from(encryptedDataString, this.encoding);
-
-      const decipher = crypto.createDecipheriv("aes-256-cbc", CRYPTO_KEY, iv);
+      const key = crypto.createHash("sha256").update(CRYPTO_KEY).digest();
+      const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
 
       const decrypted = decipher.update(encryptedText);
       return Buffer.concat([decrypted, decipher.final()]).toString();
