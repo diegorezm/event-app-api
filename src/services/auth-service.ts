@@ -5,7 +5,7 @@ import crypto from "../utils/crypto";
 import db from "../db";
 import { userTableSchema } from "../db/schema";
 import { eq } from "drizzle-orm";
-import jwt from "jsonwebtoken";
+import { sign } from "hono/jwt";
 import { SECRET_KEY } from "../env";
 
 class AuthService {
@@ -41,7 +41,13 @@ class AuthService {
     }
 
     if (userPassword === payload.password) {
-      const token = jwt.sign({ email: user.email }, SECRET_KEY);
+      const token = await sign(
+        {
+          email: user.email,
+          exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7 days
+        },
+        SECRET_KEY,
+      );
       return {
         user: user as User,
         token,
