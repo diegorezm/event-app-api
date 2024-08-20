@@ -15,7 +15,6 @@
   "dependencies": {
     "@hono/node-server": "^1.12.1",
     "@hono/zod-validator": "^0.2.2",
-    "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.33.0",
     "drizzle-zod": "^0.5.1",

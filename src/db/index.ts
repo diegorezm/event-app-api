@@ -1,8 +1,8 @@
-import { Client } from "pg";
+import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { DB_URL } from "../../src/env";
 
-const client = new Client({
+const client = new pg.Client({
   connectionString: DB_URL,
 });
 

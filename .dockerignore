@@ -1,0 +1,4 @@
+README.md
+docker-compose.dev.yaml
+**/*.test.*
+**/*.spec.*
