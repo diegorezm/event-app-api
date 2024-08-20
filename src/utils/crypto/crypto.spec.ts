@@ -6,7 +6,7 @@ test("Testing the crypto class", () => {
   expect(typeof hash).toBe("string");
   expect(hash).not.toBeUndefined();
   expect(hash).not.toBe(keyword);
-  // ts-ignore: if its undefied the test fails
+  // @ts-ignore: if this was undefied the test would have failed
   const decodeHash = crypto.decrypt(hash);
   expect(decodeHash).toBe(keyword);
 });

@@ -9,8 +9,3 @@ services:
       DB_URL: ${DB_URL}
       SECRET_KEY: ${SECRET_KEY}
       CRYPTO_KEY: ${CRYPTO_KEY}
-    networks:
-      - event-app-network
-networks:
-  event-app-network:
-    driver: bridge
