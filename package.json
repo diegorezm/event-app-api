@@ -3,7 +3,9 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "NODE_ENV=production tsx src/index.js",
+    "start:prod": "NODE_ENV=production node dist/index.cjs",
+    "start:dev": "NODE_ENV=dev --env-file=.env dist/index.cjs",
+    "build": "tsup src",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "bun run server/db/seed.ts",
@@ -26,6 +28,7 @@
     "drizzle-kit": "^0.24.0",
     "esbuild": "^0.23.1",
     "esbuild-plugin-tsc": "^0.4.0",
+    "tsup": "^8.2.4",
     "tsx": "^4.7.1",
     "typescript": "^5.5.4"
   }
