@@ -1,3 +1,4 @@
+// TODO: test this middleware
 import { Context, Next } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { verify } from "hono/jwt";
