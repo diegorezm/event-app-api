@@ -18,7 +18,8 @@ class UserService {
 
       return user;
     } catch (error) {
-      throw new HTTPException(500, { message: `Failed to fetch user by email: ${email}. ${error.message}` });
+      const errorMessage = (error as Error).message || 'Unknown error';
+      throw new HTTPException(500, { message: `Failed to fetch user by email: ${email}. ${errorMessage}` });
     }
   }
 
@@ -35,7 +36,8 @@ class UserService {
 
       return user;
     } catch (error) {
-      throw new HTTPException(500, { message: `Failed to fetch user by ID: ${id}. ${error.message}` });
+      const errorMessage = (error as Error).message || 'Unknown error';
+      throw new HTTPException(500, { message: `Failed to fetch user by ID: ${id}. ${errorMessage}` });
     }
   }
 
@@ -52,7 +54,8 @@ class UserService {
         .where(eq(userTableSchema.id, id));
 
     } catch (error) {
-      throw new HTTPException(500, { message: `Failed to delete user with ID: ${id}. ${error.message}` });
+      const errorMessage = (error as Error).message || 'Unknown error';
+      throw new HTTPException(500, { message: `Failed to delete user with ID: ${id}. ${errorMessage}` });
     }
   }
 }
