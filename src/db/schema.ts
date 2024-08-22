@@ -1,3 +1,4 @@
+
 import {
   char,
   date,
@@ -5,8 +6,9 @@ import {
   text,
   timestamp,
   uuid,
+  pgEnum,
 } from "drizzle-orm/pg-core";
-
+const RoleEnum = pgEnum("role", ["Administrator", "Employee", "User"]);
 export const userTableSchema = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: char("name", { length: 255 }).notNull(),
@@ -16,6 +18,7 @@ export const userTableSchema = pgTable("users", {
   profilePicture: text("profilePicture"),
   birthDate: date("birthDate"),
   bio: text("bio"),
+  admin: RoleEnum("admin").default("User"), 
   address: text("address"),
   cep: char("cep", { length: 12 }),
   createdAt: timestamp("created_at", { mode: "date", precision: 3 })
@@ -26,3 +29,6 @@ export const userTableSchema = pgTable("users", {
     .$onUpdate(() => new Date())
     .notNull(),
 });
+
+
+
