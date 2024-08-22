@@ -3,10 +3,14 @@ import { API_URL } from "../../env";
 import { transporter } from "../../config/mail";
 import userService from "../../services/user-service";
 import tokenService from "../../services/token-service";
+import { HTTPException } from "hono/http-exception";
 
 class Mailer {
   async verifyEmailToken(token: string) {
     const decoded = await tokenService.verify(token);
+    if (decoded.type === "login") {
+      throw new HTTPException(401, { message: "Token inválido." });
+    }
     const email = decoded.email as string;
     const user = await userService.getByEmail(email);
     await userService.update(user.id, { emailVerifiedAt: new Date() });
