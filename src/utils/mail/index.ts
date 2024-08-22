@@ -1,12 +1,10 @@
 // TODO: test this
-import jwt from "hono/jwt";
-import { HTTPException } from "hono/http-exception";
-import { API_URL, SECRET_KEY } from "../../env";
+import { API_URL } from "../../env";
 import { transporter } from "../../config/mail";
 import userService from "../../services/user-service";
 import tokenService from "../../services/token-service";
 
-class MailService {
+class Mailer {
   async verifyEmailToken(token: string) {
     const decoded = await tokenService.verify(token);
     const email = decoded.email as string;
@@ -50,4 +48,4 @@ class MailService {
     }
   }
 }
-export default new MailService();
+export default new Mailer();
