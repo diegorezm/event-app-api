@@ -13,13 +13,13 @@ class UserService {
         .where(eq(userTableSchema.email, email));
 
       if (!user) {
-        throw new HTTPException(404, { message: `User with email ${email} not found.` });
+        throw new HTTPException(404, { message: `Usuário não encontrado` });
       }
 
       return user;
     } catch (error) {
       const errorMessage = (error as Error).message || 'Unknown error';
-      throw new HTTPException(500, { message: `Failed to fetch user by email: ${email}. ${errorMessage}` });
+      throw new HTTPException(500, { message: `Erro ao encontrar Usuário` });
     }
   }
 
@@ -31,13 +31,13 @@ class UserService {
         .where(eq(userTableSchema.id, id));
 
       if (!user) {
-        throw new HTTPException(404, { message: `User with ID ${id} not found.` });
+        throw new HTTPException(404, { message: `Usuário não encontrado` });
       }
 
       return user;
     } catch (error) {
       const errorMessage = (error as Error).message || 'Unknown error';
-      throw new HTTPException(500, { message: `Failed to fetch user by ID: ${id}. ${errorMessage}` });
+      throw new HTTPException(500, { message: `Usuário não encontrado` });
     }
   }
 
@@ -46,7 +46,7 @@ class UserService {
       const user = await this.getById(id);
 
       if (!user) {
-        throw new HTTPException(404, { message: `User with ID ${id} not found.` });
+        throw new HTTPException(404, { message: `Usuário não encontrado` });
       }
 
       await db
@@ -55,7 +55,32 @@ class UserService {
 
     } catch (error) {
       const errorMessage = (error as Error).message || 'Unknown error';
-      throw new HTTPException(500, { message: `Failed to delete user with ID: ${id}. ${errorMessage}` });
+      throw new HTTPException(500, { message: `Erro ao deletar usuário` });
+    }
+  }
+
+  async updateUser(id: string, updatedFields: Partial<User>): Promise<User> {
+    try {
+      const user = await this.getById(id);
+
+      if (!user) {
+        throw new HTTPException(404, { message: `Usuário não encontrado` });
+      }
+
+      await db
+        .update(userTableSchema)
+        .set(updatedFields)
+        .where(eq(userTableSchema.id, id));
+
+      const updatedUser = await this.getById(id);
+      return updatedUser;
+
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new HTTPException(500, { message: `Erro ao atualizar Usário` });
+      } else {
+        throw new HTTPException(500, { message: `Erro ao atualizar Usário` });
+      }
     }
   }
 }
