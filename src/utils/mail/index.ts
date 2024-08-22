@@ -1,47 +1,26 @@
 // TODO: test this
 import jwt from "hono/jwt";
-import { API_URL, SECRET_KEY } from "../env";
-import { transporter } from "../config/mail";
 import { HTTPException } from "hono/http-exception";
-import userService from "./user-service";
+import { API_URL, SECRET_KEY } from "../../env";
+import { transporter } from "../../config/mail";
+import userService from "../../services/user-service";
+import tokenService from "../../services/token-service";
 
 class MailService {
   async verifyEmailToken(token: string) {
-    try {
-      const decoded = await jwt.verify(token, SECRET_KEY);
-
-      const currentTime = Math.floor(Date.now() / 1000);
-      if (decoded.exp && decoded.exp < currentTime) {
-        throw new HTTPException(401, { message: "Token expirado." });
-      }
-
-      if (!decoded.email) {
-        throw new HTTPException(401, { message: "Token inválido." });
-      }
-
-      const email = decoded.email as string;
-      const user = await userService.getByEmail(email);
-
-      // Update only the necessary field
-      await userService.update(user.id, { emailVerifiedAt: new Date() });
-
-      return true;
-    } catch (error: any) {
-      throw new HTTPException(401, {
-        message:
-          error.message === undefined
-            ? "Falha na verificação do token."
-            : error.message,
-      });
-    }
+    const decoded = await tokenService.verify(token);
+    const email = decoded.email as string;
+    const user = await userService.getByEmail(email);
+    await userService.update(user.id, { emailVerifiedAt: new Date() });
+    return true;
   }
 
   async sendVerificationEmail(userEmail: string) {
     try {
-      const token = await jwt.sign(
-        { email: userEmail, exp: Math.floor(Date.now() / 1000) + 60 * 60 },
-        SECRET_KEY,
-      );
+      const token = await tokenService.sign({
+        email: userEmail,
+        type: "email_verification",
+      });
 
       const verificationLink = `${API_URL}/auth/verify/mail/${token}`;
 

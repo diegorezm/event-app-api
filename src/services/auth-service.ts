@@ -7,6 +7,7 @@ import { userTableSchema } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { sign } from "hono/jwt";
 import { SECRET_KEY } from "../env";
+import tokenService from "./token-service";
 
 class AuthService {
   async register(payload: UserDTO) {
@@ -41,13 +42,10 @@ class AuthService {
     }
 
     if (userPassword === payload.password) {
-      const token = await sign(
-        {
-          email: user.email,
-          exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7 days
-        },
-        SECRET_KEY,
-      );
+      const token = await tokenService.sign({
+        email: user.email,
+        type: "login",
+      });
       return {
         user: user as User,
         token,
