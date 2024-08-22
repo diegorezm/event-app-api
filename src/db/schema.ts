@@ -1,4 +1,3 @@
-
 import {
   char,
   date,
@@ -18,9 +17,13 @@ export const userTableSchema = pgTable("users", {
   profilePicture: text("profilePicture"),
   birthDate: date("birthDate"),
   bio: text("bio"),
-  admin: RoleEnum("admin").default("User"), 
+  role: RoleEnum("admin").default("User"),
   address: text("address"),
   cep: char("cep", { length: 12 }),
+  emailVerifiedAt: timestamp("email_verified_at", {
+    mode: "date",
+    precision: 3,
+  }),
   createdAt: timestamp("created_at", { mode: "date", precision: 3 })
     .defaultNow()
     .notNull(),
@@ -29,6 +32,3 @@ export const userTableSchema = pgTable("users", {
     .$onUpdate(() => new Date())
     .notNull(),
 });
-
-
-

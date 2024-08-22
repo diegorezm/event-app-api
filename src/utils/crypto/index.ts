@@ -1,6 +1,6 @@
 // from: https://dev.to/vapourisation/east-encryption-in-typescript-3948
 import * as crypto from "node:crypto";
-import { CRYPTO_KEY, DB_URL } from "../../env";
+import { CRYPTO_KEY } from "../../env";
 function splitEncryptedText(encryptedText: string) {
   return {
     ivString: encryptedText.slice(0, 32),
