@@ -17,20 +17,43 @@ class Mailer {
       });
 
       const htmlContent = `
-        <!DOCTYPE html>
-        <html lang="pt-BR">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Verificação de E-mail</title>
-        </head>
-        <body>
-          <h1>Verificação de E-mail</h1>
-          <p>Seu código de verificação é:</p>
-          <p><strong>${token}</strong></p>
-          <p>Se você não solicitou esta redefinição de senha, por favor, ignore este e-mail e, se necessário, solicite uma redefinição de senha para garantir a segurança de sua conta.</p>
-        </body>
-        </html>
+            <!DOCTYPE html>
+            <html lang="pt-BR">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Redefinição de Senha</title>
+              <style>
+                .code-block {
+                  font-family: monospace;
+                  background-color: #f4f4f4;
+                  border: 1px solid #ddd;
+                  padding: 10px;
+                  border-radius: 4px;
+                  overflow-wrap: break-word;
+                  word-wrap: break-word;
+                  white-space: pre-wrap;
+                  word-break: break-all;
+                }
+
+                code {
+                  display: block;
+                  white-space: pre-wrap;
+                }
+              </style>
+            </head>
+
+            <body>
+              <h1>Redefinição de Senha</h1>
+              <p>Se você não solicitou esta redefinição de senha, por favor, ignore este e-mail e, se necessário, solicite uma
+                redefinição de senha para garantir a segurança de
+                sua conta.</p>
+              <h2>Código de redefinição de senha</h2>
+              <pre class="code-block">
+            <code>${token}</code>
+              </pre>
+            </body>
+            </html>
       `;
       const info = await transporter.sendMail({
         to: userEmail,
@@ -57,20 +80,40 @@ class Mailer {
       });
 
       const htmlContent = `
-        <!DOCTYPE html>
-        <html lang="pt-BR">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Redefinição de Senha</title>
-        </head>
-        <body>
-          <h1>Redefinição de Senha</h1>
-          <p>Seu código de redefinição de senha é:</p>
-          <p><strong>${token}</strong></p>
-          <p>Se você não solicitou esta redefinição de senha, por favor, ignore este e-mail e, se necessário, solicite uma redefinição de senha para garantir a segurança de sua conta.</p>
-        </body>
-        </html>
+            <html lang="pt-BR">
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Redefinição de Senha</title>
+              <style>
+                .code-block {
+                  font-family: monospace;
+                  background-color: #f4f4f4;
+                  border: 1px solid #ddd;
+                  padding: 10px;
+                  border-radius: 4px;
+                  overflow-wrap: break-word;
+                  word-wrap: break-word;
+                  white-space: pre-wrap;
+                  word-break: break-all;
+                }
+                code {
+                  display: block;
+                  white-space: pre-wrap;
+                }
+              </style>
+            </head>
+            <body>
+              <h1>Redefinição de Senha</h1>
+              <p>Se você não solicitou esta redefinição de senha, por favor, ignore este e-mail e, se necessário, solicite uma
+                redefinição de senha para garantir a segurança de
+                sua conta.</p>
+              <h2>Código de redefinição de senha</h2>
+              <pre class="code-block">
+            <code>${token}</code>
+              </pre>
+            </body>
+            </html>
       `;
       const info = await transporter.sendMail({
         to: userEmail,
