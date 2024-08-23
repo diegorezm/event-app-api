@@ -5,6 +5,7 @@ import authService from "../services/auth-service";
 import tokenService from "../services/token-service";
 import userService from "../services/user-service";
 import { z } from "zod";
+import mail from "../utils/mail";
 
 const app = new Hono()
   .get("/verify/:token", async (c) => {
@@ -13,6 +14,34 @@ const app = new Hono()
     const user = await userService.getByEmail(verify.email);
     return c.json({ user });
   })
+  .post(
+    "/password-reset",
+    zValidator(
+      "json",
+      z.object({
+        email: z.string().email(),
+      }),
+    ),
+    async (c) => {
+      const { email } = c.req.valid("json");
+      await mail.sendPasswordResetEmail(email);
+      return c.status(200);
+    },
+  )
+  .post(
+    "/email-verification",
+    zValidator(
+      "json",
+      z.object({
+        email: z.string().email(),
+      }),
+    ),
+    async (c) => {
+      const { email } = c.req.valid("json");
+      await mail.sendVerificationEmail(email);
+      return c.status(200);
+    },
+  )
   .post("/verify/email-verification/:token", async (c) => {
     const token = c.req.param("token");
     await authService.verifyEmail(token);
