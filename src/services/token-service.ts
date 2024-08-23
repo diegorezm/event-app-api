@@ -1,10 +1,10 @@
-import jwt from "hono/jwt";
+import { verify, sign } from "hono/jwt";
 import { SECRET_KEY } from "../env";
 import { HTTPException } from "hono/http-exception";
 
 type TokenPayload = {
   email: string;
-  type: "login" | "email_verification";
+  type: "login" | "email_verification" | "password_reset";
   exp?: number;
 };
 
@@ -15,13 +15,13 @@ class TokenService {
       payload.exp =
         Math.floor(Date.now() / 1000) + TokenService.DEFAULT_EXPIRATION;
     }
-    const token = await jwt.sign(payload, SECRET_KEY);
+    const token = await sign(payload, SECRET_KEY);
     return token;
   }
 
   async verify(token: string): Promise<TokenPayload> {
     try {
-      const decoded = (await jwt.verify(token, SECRET_KEY)) as TokenPayload;
+      const decoded = (await verify(token, SECRET_KEY)) as TokenPayload;
 
       const currentTime = Math.floor(Date.now() / 1000);
 

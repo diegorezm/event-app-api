@@ -5,11 +5,31 @@ import crypto from "../utils/crypto";
 import db from "../db";
 import { userTableSchema } from "../db/schema";
 import { eq } from "drizzle-orm";
-import { sign } from "hono/jwt";
-import { SECRET_KEY } from "../env";
 import tokenService from "./token-service";
 
 class AuthService {
+  async passwordReset(token: string, password: string) {
+    const verify = await tokenService.verify(token);
+    if (verify.type !== "password_reset") {
+      throw new HTTPException(403);
+    }
+    const user = await userService.getByEmail(verify.email);
+    let hash = crypto.encrypt(password);
+    await db
+      .update(userTableSchema)
+      .set({ password: hash })
+      .where(eq(userTableSchema.id, user.id));
+  }
+
+  async verifyEmail(token: string) {
+    const verify = await tokenService.verify(token);
+    if (verify.type !== "email_verification") {
+      throw new HTTPException(403);
+    }
+    const user = await userService.getByEmail(verify.email);
+    await userService.update(user.id, { emailVerifiedAt: new Date() });
+  }
+
   async register(payload: UserDTO) {
     const userExists = await userService.getByEmail(payload.email);
     if (userExists) {
