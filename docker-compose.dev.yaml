@@ -1,19 +1,4 @@
 services:
-  event-app-api:
-    build:
-      context: .
-    container_name: event-app-api
-    ports:
-      - "3000:3000"
-    environment:
-      DB_URL: postgres://user:1234@postgres:5432/db
-      SECRET_KEY: ${SECRET_KEY}
-      CRYPTO_KEY: ${CRYPTO_KEY}
-    networks:
-      - shared-network
-    depends_on:
-      - postgres
-
   postgres:
     image: postgres:14-alpine
     container_name: postgres
@@ -24,8 +9,18 @@ services:
       POSTGRES_USER: user
       POSTGRES_DB: db
     networks:
-      - shared-network
+      - app-network
+
+  smtp4dev:
+    image: rnwood/smtp4dev
+    container_name: smtp4dev
+    ports:
+      - "5000:80" # Web interface
+      - "2525:25" # SMTP port
+    restart: always
+    networks:
+      - app-network
 
 networks:
-  shared-network:
+  app-network:
     driver: bridge

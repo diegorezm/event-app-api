@@ -10,11 +10,6 @@ class UserService {
       .select()
       .from(userTableSchema)
       .where(eq(userTableSchema.email, email));
-
-    if (!user) {
-      throw new HTTPException(404, { message: `Usuário não encontrado` });
-    }
-
     return user;
   }
 
@@ -23,11 +18,6 @@ class UserService {
       .select()
       .from(userTableSchema)
       .where(eq(userTableSchema.id, id));
-
-    if (!user) {
-      throw new HTTPException(404, { message: `Usuário não encontrado` });
-    }
-
     return user;
   }
 
