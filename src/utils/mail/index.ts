@@ -1,10 +1,17 @@
 import { transporter } from "../../config/mail";
 import tokenService from "../../services/token-service";
 import { HTTPException } from "hono/http-exception";
+import userService from "../../services/user-service";
+import { API_URL } from "../../env";
 
 class Mailer {
   async sendVerificationEmail(userEmail: string) {
     try {
+      const userExists = await userService.getByEmail(userEmail);
+      if (!userExists) {
+        throw new HTTPException(401);
+      }
+
       const token = await tokenService.sign({
         email: userEmail,
         type: "email_verification",
@@ -22,6 +29,7 @@ class Mailer {
           <h1>Verificação de E-mail</h1>
           <p>Seu código de verificação é:</p>
           <p><strong>${token}</strong></p>
+          <p>Se você não solicitou esta redefinição de senha, por favor, ignore este e-mail e, se necessário, solicite uma redefinição de senha para garantir a segurança de sua conta.</p>
         </body>
         </html>
       `;
@@ -40,6 +48,10 @@ class Mailer {
 
   async sendPasswordResetEmail(userEmail: string) {
     try {
+      const userExists = await userService.getByEmail(userEmail);
+      if (!userExists) {
+        throw new HTTPException(401);
+      }
       const token = await tokenService.sign({
         email: userEmail,
         type: "password_reset",
@@ -57,6 +69,7 @@ class Mailer {
           <h1>Redefinição de Senha</h1>
           <p>Seu código de redefinição de senha é:</p>
           <p><strong>${token}</strong></p>
+          <p>Se você não solicitou esta redefinição de senha, por favor, ignore este e-mail e, se necessário, solicite uma redefinição de senha para garantir a segurança de sua conta.</p>
         </body>
         </html>
       `;
