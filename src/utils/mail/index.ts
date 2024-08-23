@@ -2,7 +2,6 @@ import { transporter } from "../../config/mail";
 import tokenService from "../../services/token-service";
 import { HTTPException } from "hono/http-exception";
 import userService from "../../services/user-service";
-import { API_URL } from "../../env";
 
 class Mailer {
   async sendVerificationEmail(userEmail: string) {
