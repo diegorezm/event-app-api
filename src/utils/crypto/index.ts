@@ -9,7 +9,7 @@ function splitEncryptedText(encryptedText: string) {
 }
 
 class Crypto {
-  encoding: BufferEncoding = "hex";
+  private encoding: BufferEncoding = "hex";
 
   encrypt(plaintext: string) {
     try {

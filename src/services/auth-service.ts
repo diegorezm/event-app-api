@@ -14,7 +14,7 @@ class AuthService {
       throw new HTTPException(403);
     }
     const user = await userService.getByEmail(verify.email);
-    let hash = crypto.encrypt(password);
+    const hash = crypto.encrypt(password);
     await db
       .update(userTableSchema)
       .set({ password: hash })

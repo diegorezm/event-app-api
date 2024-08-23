@@ -7,7 +7,11 @@ import {
   uuid,
   pgEnum,
 } from "drizzle-orm/pg-core";
-export const RoleEnum = pgEnum("role", ["Administrator", "Employee", "User"]);
+export const userRolesEnum = pgEnum("role", [
+  "Administrator",
+  "Employee",
+  "User",
+]);
 export const userTableSchema = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
@@ -17,7 +21,7 @@ export const userTableSchema = pgTable("users", {
   profilePicture: text("profilePicture"),
   birthDate: date("birthDate"),
   bio: text("bio"),
-  role: RoleEnum("admin").default("User"),
+  role: userRolesEnum("role").default("User"),
   address: text("address"),
   cep: varchar("cep", { length: 12 }),
   emailVerifiedAt: timestamp("email_verified_at", {
