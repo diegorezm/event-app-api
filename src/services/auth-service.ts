@@ -21,15 +21,6 @@ class AuthService {
       .where(eq(userTableSchema.id, user.id));
   }
 
-  async verifyEmail(token: string) {
-    const verify = await tokenService.verify(token);
-    if (verify.type !== "email_verification") {
-      throw new HTTPException(403);
-    }
-    const user = await userService.getByEmail(verify.email);
-    await userService.update(user.id, { emailVerifiedAt: new Date() });
-  }
-
   async register(payload: UserDTO) {
     const userExists = await userService.getByEmail(payload.email);
     if (userExists) {

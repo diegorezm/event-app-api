@@ -4,6 +4,10 @@ import userService from "../../services/user-service";
 import otpService from "../../services/otp-service";
 import crypto from "../crypto";
 import { MAIL_USER } from "../../env";
+import db from "../../db";
+import { userTableSchema } from "../../db/schema";
+import { eq } from "drizzle-orm";
+import { User } from "../../models/user";
 
 const template = ({
   title,
@@ -142,15 +146,21 @@ class Mailer {
       throw new HTTPException(403);
     }
     const user = await userService.update(userExists.id, { verified: true });
-    return user;
+    return {
+      user,
+    };
   }
 
-  async passwordResetOtp(userEmail: string, otp: string) {
+  async passwordResetOtp(newPassword: string, userEmail: string, otp: string) {
     const userExists = await userService.getByEmail(userEmail);
     if (!userExists) {
       throw new HTTPException(404, {
         message: "Email inválido.",
       });
+    }
+
+    if (userExists.verified === false) {
+      throw new HTTPException(403);
     }
     const token = await otpService.verify({
       userId: userExists.id,
@@ -161,8 +171,24 @@ class Mailer {
     if (!token) {
       throw new HTTPException(403);
     }
-    const user = await userService.update(userExists.id, { verified: true });
-    return user;
+    const hash = crypto.encrypt(newPassword);
+    if (hash === undefined) {
+      throw new HTTPException(500, {
+        message: "Não foi possivel redefinir a senha.",
+      });
+    }
+    try {
+      const [user] = await db
+        .update(userTableSchema)
+        .set({ password: hash })
+        .where(eq(userTableSchema.id, userExists.id))
+        .returning();
+      return { user: user as User };
+    } catch (error) {
+      throw new HTTPException(500, {
+        message: "Não foi possivel redefinir a senha.",
+      });
+    }
   }
 }
 

@@ -40,7 +40,7 @@ export const userTableSchema = pgTable("users", {
   role: userRolesEnum("role").default("User"),
   address: text("address"),
   cep: varchar("cep", { length: 12 }),
-  verified: boolean("verified"),
+  verified: boolean("verified").default(false),
   createdAt: timestamp("created_at", { mode: "date", precision: 3 })
     .defaultNow()
     .notNull(),
