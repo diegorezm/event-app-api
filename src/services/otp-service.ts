@@ -156,7 +156,9 @@ class OtpService {
       operation,
     });
     if (data === undefined) {
-      throw new HTTPException(404);
+      throw new HTTPException(404, {
+        message: "Token não encontrado.",
+      });
     }
     const token = crypto.decrypt(data.otp);
     if (token === undefined) {

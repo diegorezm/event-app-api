@@ -21,7 +21,7 @@ class AuthService {
       .where(eq(userTableSchema.id, user.id));
   }
 
-  async register(payload: UserDTO) {
+  async register(payload: UserDTO): Promise<User> {
     const userExists = await userService.getByEmail(payload.email);
     if (userExists) {
       throw new HTTPException(403, { message: "Email já cadastrado." });
@@ -34,7 +34,7 @@ class AuthService {
     }
     payload.password = passwordHash;
     const [user] = await db.insert(userTableSchema).values(payload).returning();
-    return user as User;
+    return user;
   }
 
   async login(payload: UserLoginDTO) {

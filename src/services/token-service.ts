@@ -2,7 +2,7 @@ import { verify, sign } from "hono/jwt";
 import { SECRET_KEY } from "../env";
 import { HTTPException } from "hono/http-exception";
 
-type TokenPayload = {
+export type TokenPayload = {
   email: string;
   type: "login" | "email_verification" | "password_reset";
   exp?: number;

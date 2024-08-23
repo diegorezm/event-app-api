@@ -95,7 +95,14 @@ class Mailer {
     try {
       const userExists = await userService.getByEmail(userEmail);
       if (!userExists) {
-        throw new HTTPException(401);
+        throw new HTTPException(404, {
+          message: "Usuário não existe.",
+        });
+      }
+      if (userExists.verified) {
+        throw new HTTPException(403, {
+          message: "Usuário já esta verificado.",
+        });
       }
       const token = await otpService.create({
         operation: "PASSWORD_RESET",
@@ -130,25 +137,31 @@ class Mailer {
   }
 
   async emailVerificationOtp(userEmail: string, otp: string) {
-    const userExists = await userService.getByEmail(userEmail);
-    if (!userExists) {
-      throw new HTTPException(404, {
-        message: "Email inválido.",
+    try {
+      const userExists = await userService.getByEmail(userEmail);
+      if (!userExists) {
+        throw new HTTPException(404, {
+          message: "Email inválido.",
+        });
+      }
+      const token = await otpService.verify({
+        userId: userExists.id,
+        otp,
+        operation: "EMAIL_VERIFICATION",
       });
-    }
-    const token = await otpService.verify({
-      userId: userExists.id,
-      otp,
-      operation: "EMAIL_VERIFICATION",
-    });
 
-    if (!token) {
-      throw new HTTPException(403);
+      if (!token) {
+        throw new HTTPException(403, {
+          message: "Erro!",
+        });
+      }
+      const user = await userService.update(userExists.id, { verified: true });
+      return {
+        user,
+      };
+    } catch (error: any) {
+      throw error();
     }
-    const user = await userService.update(userExists.id, { verified: true });
-    return {
-      user,
-    };
   }
 
   async passwordResetOtp(newPassword: string, userEmail: string, otp: string) {

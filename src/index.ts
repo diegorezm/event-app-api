@@ -6,12 +6,14 @@ import { logger } from "hono/logger";
 import { ZodError } from "zod";
 import { PORT, NODE_ENV } from "./env";
 import authRoutes from "./routes/auth-routes";
+import userRoute from "./routes/user-route";
 
 const app = new Hono();
 
 app.use(logger());
 
 app.route("/auth", authRoutes);
+app.route("/users", userRoute);
 
 app.onError((err, c) => {
   if (NODE_ENV === "dev") {

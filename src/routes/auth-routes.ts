@@ -21,15 +21,16 @@ const app = new Hono()
       z.object({
         otp: z.string(),
         email: z.string().email(),
+        newPassword: z.string(),
       }),
     ),
     async (c) => {
-      const { otp, email } = c.req.valid("json");
-      const data = await mail.passwordResetOtp(email, otp);
+      const { otp, email, newPassword } = c.req.valid("json");
+      const data = await mail.passwordResetOtp(newPassword, email, otp);
       return c.json(data);
     },
   )
-  .get(
+  .post(
     "/verify/otp/email-verification",
     zValidator(
       "json",
@@ -55,7 +56,7 @@ const app = new Hono()
     async (c) => {
       const { email } = c.req.valid("json");
       await mail.sendPasswordResetEmail(email);
-      return c.status(200);
+      return c.json({ message: "Email enviado!" }, 200);
     },
   )
   .post(
@@ -69,7 +70,7 @@ const app = new Hono()
     async (c) => {
       const { email } = c.req.valid("json");
       await mail.sendVerificationEmail(email);
-      return c.status(200);
+      return c.json({ message: "Email enviado!" }, 200);
     },
   )
   .post("/verify/email-verification/:token", async (c) => {
