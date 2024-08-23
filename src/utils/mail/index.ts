@@ -1,7 +1,9 @@
 import { transporter } from "../../config/mail";
-import tokenService from "../../services/token-service";
 import { HTTPException } from "hono/http-exception";
 import userService from "../../services/user-service";
+import otpService from "../../services/otp-service";
+import crypto from "../crypto";
+import { MAIL_USER } from "../../env";
 
 const template = ({
   title,
@@ -56,18 +58,26 @@ class Mailer {
     try {
       const userExists = await userService.getByEmail(userEmail);
       if (!userExists) {
-        throw new HTTPException(401);
+        throw new HTTPException(404);
       }
 
-      const token = await tokenService.sign({
-        email: userEmail,
-        type: "email_verification",
+      const token = await otpService.create({
+        userId: userExists.id,
+        operation: "EMAIL_VERIFICATION",
       });
+      const otp = crypto.decrypt(token.otp);
+
+      if (otp === undefined) {
+        throw new HTTPException(500, {
+          message: "Não foi possivel gerar este token.",
+        });
+      }
 
       const info = await transporter.sendMail({
+        from: MAIL_USER,
         to: userEmail,
         subject: "Código de verificação.",
-        html: template({ title: "Verificação de email", token }),
+        html: template({ title: "Verificação de email", token: otp }),
       });
       return info;
     } catch (error: any) {
@@ -83,18 +93,27 @@ class Mailer {
       if (!userExists) {
         throw new HTTPException(401);
       }
-      const token = await tokenService.sign({
-        email: userEmail,
-        type: "password_reset",
+      const token = await otpService.create({
+        operation: "PASSWORD_RESET",
+        userId: userExists.id,
       });
+
+      const otp = crypto.decrypt(token.otp);
+
+      if (otp === undefined) {
+        throw new HTTPException(500, {
+          message: "Não foi possivel gerar este token.",
+        });
+      }
       const obs =
         "<p>Se você não solicitou esta redefinição de senha, por favor, ignore este e-mail e, se necessário, solicite uma redefinição de senha para garantir a segurança de sua conta.</p>";
       const info = await transporter.sendMail({
+        from: MAIL_USER,
         to: userEmail,
         subject: "Código de redefinição de senha.",
         html: template({
           title: "Redefinição de senha",
-          token,
+          token: otp,
           obs,
         }),
       });
@@ -104,6 +123,46 @@ class Mailer {
         message: "Falha ao enviar e-mail de redefinição de senha.",
       });
     }
+  }
+
+  async emailVerificationOtp(userEmail: string, otp: string) {
+    const userExists = await userService.getByEmail(userEmail);
+    if (!userExists) {
+      throw new HTTPException(404, {
+        message: "Email inválido.",
+      });
+    }
+    const token = await otpService.verify({
+      userId: userExists.id,
+      otp,
+      operation: "EMAIL_VERIFICATION",
+    });
+
+    if (!token) {
+      throw new HTTPException(403);
+    }
+    const user = await userService.update(userExists.id, { verified: true });
+    return user;
+  }
+
+  async passwordResetOtp(userEmail: string, otp: string) {
+    const userExists = await userService.getByEmail(userEmail);
+    if (!userExists) {
+      throw new HTTPException(404, {
+        message: "Email inválido.",
+      });
+    }
+    const token = await otpService.verify({
+      userId: userExists.id,
+      otp,
+      operation: "PASSWORD_RESET",
+    });
+
+    if (!token) {
+      throw new HTTPException(403);
+    }
+    const user = await userService.update(userExists.id, { verified: true });
+    return user;
   }
 }
 

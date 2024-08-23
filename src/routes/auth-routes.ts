@@ -14,6 +14,36 @@ const app = new Hono()
     const user = await userService.getByEmail(verify.email);
     return c.json({ user });
   })
+  .get(
+    "/verify/otp/password-reset",
+    zValidator(
+      "json",
+      z.object({
+        otp: z.string(),
+        email: z.string().email(),
+      }),
+    ),
+    async (c) => {
+      const { otp, email } = c.req.valid("json");
+      const data = await mail.passwordResetOtp(email, otp);
+      return c.json(data);
+    },
+  )
+  .get(
+    "/verify/otp/email-verification",
+    zValidator(
+      "json",
+      z.object({
+        otp: z.string(),
+        email: z.string().email(),
+      }),
+    ),
+    async (c) => {
+      const { otp, email } = c.req.valid("json");
+      const data = await mail.emailVerificationOtp(email, otp);
+      return c.json(data);
+    },
+  )
   .post(
     "/password-reset",
     zValidator(

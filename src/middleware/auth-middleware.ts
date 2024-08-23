@@ -3,6 +3,7 @@ import { Context, Next } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { verify } from "hono/jwt";
 import { SECRET_KEY } from "../env";
+import tokenService from "../services/token-service";
 
 export const authMiddleware = async (c: Context, next: Next) => {
   const headerToken = c.req.header("Authorization") || "";
@@ -14,7 +15,7 @@ export const authMiddleware = async (c: Context, next: Next) => {
     if (!jwt) {
       throw new HTTPException(401);
     }
-    const tokenData = await verify(jwt, SECRET_KEY);
+    const tokenData = await tokenService.verify(jwt);
 
     if (!tokenData) {
       throw new HTTPException(401);
