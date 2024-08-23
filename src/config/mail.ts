@@ -13,3 +13,9 @@ export const transporter = nodemailer.createTransport({
     pass: MAIL_PASS,
   },
 });
+
+transporter.sendMail({
+  from: "euaaa@email.com",
+  to: "abc@email.com",
+  subject: "sexo",
+});

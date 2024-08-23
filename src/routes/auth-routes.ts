@@ -29,6 +29,7 @@ const app = new Hono()
   })
   .post("/register", zValidator("json", userInsertSchema), async (c) => {
     const body = c.req.valid("json");
+    console.log("body: ", body);
     const response = await authService.register(body);
     return c.json(response);
   });

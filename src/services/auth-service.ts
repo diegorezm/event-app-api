@@ -5,8 +5,6 @@ import crypto from "../utils/crypto";
 import db from "../db";
 import { userTableSchema } from "../db/schema";
 import { eq } from "drizzle-orm";
-import { sign } from "hono/jwt";
-import { SECRET_KEY } from "../env";
 import tokenService from "./token-service";
 
 class AuthService {
@@ -22,6 +20,7 @@ class AuthService {
       });
     }
     payload.password = passwordHash;
+    console.log("payload: ", payload);
     const [user] = await db.insert(userTableSchema).values(payload).returning();
     return user as User;
   }

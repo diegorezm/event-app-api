@@ -3,6 +3,7 @@ import { z } from "zod";
 const envSchema = z.object({
   NODE_ENV: z.string().default("dev"),
   DB_URL: z.string().url(),
+  PORT: z.coerce.number().default(3000),
   SECRET_KEY: z.string(),
   CRYPTO_KEY: z.string(),
   MAIL_HOST: z.string(),
@@ -12,7 +13,7 @@ const envSchema = z.object({
     .refine((val) => !isNaN(val), {
       message: "MAIL_PORT must be a valid number",
     }),
-  MAIL_USER: z.string().email(),
+  MAIL_USER: z.string(),
   MAIL_PASS: z.string(),
   API_URL: z.string().url(),
 });
@@ -34,4 +35,5 @@ export const {
   MAIL_USER,
   MAIL_PASS,
   API_URL,
+  PORT,
 } = env.data;
