@@ -65,6 +65,12 @@ class Mailer {
         throw new HTTPException(404);
       }
 
+      if (userExists.verified) {
+        throw new HTTPException(403, {
+          message: "Usuário já esta verificado.",
+        });
+      }
+
       const token = await otpService.create({
         userId: userExists.id,
         operation: "EMAIL_VERIFICATION",
@@ -99,11 +105,6 @@ class Mailer {
           message: "Usuário não existe.",
         });
       }
-      if (userExists.verified) {
-        throw new HTTPException(403, {
-          message: "Usuário já esta verificado.",
-        });
-      }
       const token = await otpService.create({
         operation: "PASSWORD_RESET",
         userId: userExists.id,
@@ -131,7 +132,8 @@ class Mailer {
       return info;
     } catch (error: any) {
       throw new HTTPException(500, {
-        message: "Falha ao enviar e-mail de redefinição de senha.",
+        message:
+          error.message ?? "Falha ao enviar e-mail de redefinição de senha.",
       });
     }
   }

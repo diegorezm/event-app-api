@@ -14,7 +14,7 @@ const app = new Hono()
     const user = await userService.getByEmail(verify.email);
     return c.json({ user });
   })
-  .get(
+  .post(
     "/verify/otp/password-reset",
     zValidator(
       "json",
