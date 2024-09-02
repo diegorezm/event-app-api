@@ -3,12 +3,12 @@ import {
   varchar,
   date,
   pgTable,
-  text,
   timestamp,
   uuid,
   pgEnum,
   integer,
   boolean,
+  text,
 } from "drizzle-orm/pg-core";
 
 export const userRolesEnum = pgEnum("user_roles", [
@@ -67,4 +67,36 @@ export const userOtpSchema = pgTable("user_otp", {
   expiresAt: timestamp("expires_at", { mode: "date", precision: 3 })
     .default(sql`now() + interval '1 hour'`)
     .notNull(),
+});
+
+export const eventsTableSchema = pgTable("events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: varchar("name", {
+    length: 255,
+  }).notNull(),
+  description: text("description"),
+  location: text("location").notNull(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  totalTickets: integer("total_tickets"),
+  createdBy: uuid("user_id")
+    .references(() => userTableSchema.id)
+    .notNull(),
+  createdAt: timestamp("created_at", {
+    mode: "date",
+    precision: 3,
+  })
+    .defaultNow()
+    .notNull(),
+});
+
+export const ticketsTableSchema = pgTable("tickets", {
+  id: integer("id").generatedAlwaysAsIdentity().primaryKey(),
+  eventId: uuid("event_id")
+    .references(() => eventsTableSchema.id)
+    .notNull(),
+  buyerId: uuid("buyer_id")
+    .references(() => userTableSchema.id)
+    .notNull(),
+  purchase_time: timestamp("purchase_time").defaultNow().notNull(),
 });
