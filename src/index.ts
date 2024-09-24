@@ -4,12 +4,19 @@ import { logger } from "hono/logger";
 import { PORT } from "./env";
 
 import authRoutes from "./routes/auth.routes";
+import { HTTPException } from "hono/http-exception";
 
 const app = new Hono();
 
 app.use(logger());
 
 app.route("/auth", authRoutes)
+app.onError((error, c) => {
+  if (error instanceof HTTPException) {
+    return c.json({ message: error.message }, error.status)
+  }
+  return c.json({ message: "Erro interno do servidor" }, 500)
+})
 
 const server = serve({
   fetch: app.fetch,
