@@ -10,8 +10,8 @@ async function connectDB() {
   try {
     await client.connect();
     console.log("Connected to PostgreSQL database");
-  } catch (err: any) {
-    console.error("Error connecting to PostgreSQL database:", err.message);
+  } catch (err: unknown) {
+    console.error("Error connecting to PostgreSQL database:", err);
     throw err;
   }
 }

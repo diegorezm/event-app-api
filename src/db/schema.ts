@@ -1,4 +1,3 @@
-import { sql } from "drizzle-orm";
 import {
   varchar,
   date,
@@ -64,9 +63,7 @@ export const userOtpSchema = pgTable("user_otp", {
   })
     .defaultNow()
     .notNull(),
-  expiresAt: timestamp("expires_at", { mode: "date", precision: 3 })
-    .default(sql`now() + interval '1 hour'`)
-    .notNull(),
+  expiresAt: timestamp("expires_at", { mode: "date", precision: 3 }).notNull(),
 });
 
 export const eventsTableSchema = pgTable("events", {

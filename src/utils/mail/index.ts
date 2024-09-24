@@ -1,189 +1,26 @@
 import { transporter } from "../../config/mail";
-import { HTTPException } from "hono/http-exception";
-import userService from "../../services/user-service";
-import otpService from "../../services/otp-service";
-import crypto from "../crypto";
 import { MAIL_USER } from "../../env";
-import db from "../../db";
-import { userTableSchema } from "../../db/schema";
-import { eq } from "drizzle-orm";
-import { User } from "../../models/user";
+import { InternalServerError } from "../../types";
 
-const template = ({
-  title,
-  obs,
-  token,
-}: {
-  title: string;
-  token: string;
-  obs?: string;
-}) => {
-  return `
-  <!DOCTYPE html>
-  <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title}</title>
-  </head>
-  <body>
-    <h1>${title}</h1>
-    <h2>Código</h2>
-    <pre><p><strong>${token}</strong></p></pre>
-    ${obs ?? ""}
-  </body>
-  </html>
-`;
-};
-
-class Mailer {
-  async sendVerificationEmail(userEmail: string) {
-    try {
-      const userExists = await userService.getByEmail(userEmail);
-      if (!userExists) {
-        throw new HTTPException(404);
-      }
-
-      if (userExists.verified) {
-        throw new HTTPException(403, {
-          message: "Usuário já esta verificado.",
-        });
-      }
-
-      const token = await otpService.create({
-        userId: userExists.id,
-        operation: "EMAIL_VERIFICATION",
-      });
-      const otp = crypto.decrypt(token.otp);
-
-      if (otp === undefined) {
-        throw new HTTPException(500, {
-          message: "Não foi possivel gerar este token.",
-        });
-      }
-
-      const info = await transporter.sendMail({
-        from: MAIL_USER,
-        to: userEmail,
-        subject: "Código de verificação.",
-        html: template({ title: "Verificação de email", token: otp }),
-      });
-      return info;
-    } catch (error: any) {
-      throw new HTTPException(500, {
-        message: "Falha ao enviar e-mail de verificação.",
-      });
-    }
-  }
-
-  async sendPasswordResetEmail(userEmail: string) {
-    try {
-      const userExists = await userService.getByEmail(userEmail);
-      if (!userExists) {
-        throw new HTTPException(404, {
-          message: "Usuário não existe.",
-        });
-      }
-      const token = await otpService.create({
-        operation: "PASSWORD_RESET",
-        userId: userExists.id,
-      });
-
-      const otp = crypto.decrypt(token.otp);
-
-      if (otp === undefined) {
-        throw new HTTPException(500, {
-          message: "Não foi possivel gerar este token.",
-        });
-      }
-      const obs =
-        "<p>Se você não solicitou esta redefinição de senha, por favor, ignore este e-mail e, se necessário, solicite uma redefinição de senha para garantir a segurança de sua conta.</p>";
-      const info = await transporter.sendMail({
-        from: MAIL_USER,
-        to: userEmail,
-        subject: "Código de redefinição de senha.",
-        html: template({
-          title: "Redefinição de senha",
-          token: otp,
-          obs,
-        }),
-      });
-      return info;
-    } catch (error: any) {
-      throw new HTTPException(500, {
-        message:
-          error.message ?? "Falha ao enviar e-mail de redefinição de senha.",
-      });
-    }
-  }
-
-  async emailVerificationOtp(userEmail: string, otp: string) {
-    try {
-      const userExists = await userService.getByEmail(userEmail);
-      if (!userExists) {
-        throw new HTTPException(404, {
-          message: "Email inválido.",
-        });
-      }
-      const token = await otpService.verify({
-        userId: userExists.id,
-        otp,
-        operation: "EMAIL_VERIFICATION",
-      });
-
-      if (!token) {
-        throw new HTTPException(403, {
-          message: "Erro!",
-        });
-      }
-      const user = await userService.update(userExists.id, { verified: true });
-      return {
-        user,
-      };
-    } catch (error: any) {
-      throw error();
-    }
-  }
-
-  async passwordResetOtp(newPassword: string, userEmail: string, otp: string) {
-    const userExists = await userService.getByEmail(userEmail);
-    if (!userExists) {
-      throw new HTTPException(404, {
-        message: "Email inválido.",
-      });
-    }
-
-    if (userExists.verified === false) {
-      throw new HTTPException(403);
-    }
-    const token = await otpService.verify({
-      userId: userExists.id,
-      otp,
-      operation: "PASSWORD_RESET",
-    });
-
-    if (!token) {
-      throw new HTTPException(403);
-    }
-    const hash = crypto.encrypt(newPassword);
-    if (hash === undefined) {
-      throw new HTTPException(500, {
-        message: "Não foi possivel redefinir a senha.",
-      });
-    }
-    try {
-      const [user] = await db
-        .update(userTableSchema)
-        .set({ password: hash })
-        .where(eq(userTableSchema.id, userExists.id))
-        .returning();
-      return { user: user as User };
-    } catch (error) {
-      throw new HTTPException(500, {
-        message: "Não foi possivel redefinir a senha.",
-      });
-    }
-  }
+export type SendEmailProps = {
+  to: string;
+  subject: string;
+  content: string;
 }
 
-export default new Mailer();
+export default async function sendEmail({ to, subject, content }: SendEmailProps) {
+  try {
+    const info = await transporter.sendMail({
+      from: MAIL_USER,
+      to,
+      subject,
+      text: content,
+    });
+    return info;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new InternalServerError(error.message);
+    }
+    throw new InternalServerError("Não foi possível enviar o email.");
+  }
+}

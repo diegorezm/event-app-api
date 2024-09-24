@@ -1,10 +1,6 @@
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { createInsertSchema } from "drizzle-zod";
 import { userTableSchema } from "../../db/schema";
 import { z } from "zod";
-
-const userSelectSchema = createSelectSchema(userTableSchema).omit({
-  password: true,
-});
 
 export const userInsertSchema = createInsertSchema(userTableSchema, {
   name: z.string({ required_error: "Nome é obrigatório" }),
@@ -42,7 +38,27 @@ export const userUpdateSchema = createInsertSchema(userTableSchema)
   .partial();
 
 // export user schema as User type
-export type User = z.infer<typeof userSelectSchema>;
+export type User = typeof userTableSchema.$inferSelect;
+export type UserSafe = Omit<User, "password">;
 export type UserDTO = z.infer<typeof userInsertSchema>;
 export type UserLoginDTO = z.infer<typeof userLoginSchema>;
 export type UserUpdateDTO = z.infer<typeof userUpdateSchema>;
+
+export const toUserSafe = (user: User): UserSafe => {
+  const safeUser: UserSafe = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    profilePicture: user.profilePicture,
+    birthDate: user.birthDate,
+    bio: user.bio,
+    address: user.address,
+    cep: user.cep,
+    role: user.role,
+    verified: user.verified,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+  return safeUser;
+};

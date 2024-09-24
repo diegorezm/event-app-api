@@ -1,4 +1,4 @@
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { createInsertSchema } from "drizzle-zod";
 import {
   userOtpOperationEnum,
   userOtpSchema,
@@ -6,15 +6,16 @@ import {
 } from "../../db/schema";
 import { z } from "zod";
 
-const selectSchema = createSelectSchema(userOtpSchema);
-export const userOtpInsertSchema = createInsertSchema(userOtpSchema).omit({
+export const userOtpInsertSchema = createInsertSchema(userOtpSchema, {
+  status: z.enum(["PENDING", "EXPIRED", "SUCCESS"]).default("PENDING"),
+}).omit({
   createdAt: true,
-  expiresAt: true,
   id: true,
   otp: true,
+  expiresAt: true,
 });
 
-export type UserOtp = z.infer<typeof selectSchema>;
+export type UserOtp = typeof userOtpSchema.$inferSelect;
 export type UserOtpDTO = z.infer<typeof userOtpInsertSchema>;
 export type UserOtpStatus = (typeof userOtpStatusEnum.enumValues)[number];
 export type UserOtpOperation = (typeof userOtpOperationEnum.enumValues)[number];
