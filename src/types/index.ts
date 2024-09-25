@@ -1,5 +1,11 @@
 import { HTTPException } from "hono/http-exception";
 
+export type PaginatedRequest = {
+  q?: string;
+  page?: number;
+  pageSize?: number;
+}
+
 export type PaginatedResponse<T> = {
   data: T[];
   total: number;

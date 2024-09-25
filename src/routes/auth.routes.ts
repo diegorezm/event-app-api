@@ -62,8 +62,8 @@ router.mount("/email-verify", authMailRoutes.fetch)
 
 router.post("/login", zValidator("json", userLoginSchema), async (c) => {
   const loginSchema = c.req.valid("json")
-  const user = await authService.login(loginSchema)
-  return c.json(user, 200)
+  const response = await authService.login(loginSchema)
+  return c.json(response, 200)
 })
 
 router.post("/register", zValidator("json", userInsertSchema), async (c) => {

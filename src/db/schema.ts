@@ -13,7 +13,7 @@ import {
 export const userRolesEnum = pgEnum("user_roles", [
   "Administrator",
   "Employee",
-  "User",
+  "Regular",
 ]);
 
 export const userOtpStatusEnum = pgEnum("user_otp_status", [
@@ -36,7 +36,7 @@ export const userTableSchema = pgTable("users", {
   profilePicture: text("profilePicture"),
   birthDate: date("birthDate"),
   bio: text("bio"),
-  role: userRolesEnum("role").default("User"),
+  role: userRolesEnum("role").default("Regular"),
   address: text("address"),
   cep: varchar("cep", { length: 12 }),
   verified: boolean("verified").default(false),
@@ -68,14 +68,14 @@ export const userOtpSchema = pgTable("user_otp", {
 
 export const eventsTableSchema = pgTable("events", {
   id: uuid("id").defaultRandom().primaryKey(),
-  name: varchar("name", {
+  title: varchar("title", {
     length: 255,
   }).notNull(),
   description: text("description"),
   location: text("location").notNull(),
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time").notNull(),
-  totalTickets: integer("total_tickets"),
+  totalTickets: integer("total_tickets").notNull(),
   createdBy: uuid("user_id")
     .references(() => userTableSchema.id)
     .notNull(),
@@ -84,6 +84,12 @@ export const eventsTableSchema = pgTable("events", {
     precision: 3,
   })
     .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", {
+    mode: "date",
+    precision: 3,
+  })
+    .$onUpdate(() => new Date())
     .notNull(),
 });
 
@@ -95,5 +101,15 @@ export const ticketsTableSchema = pgTable("tickets", {
   buyerId: uuid("buyer_id")
     .references(() => userTableSchema.id)
     .notNull(),
-  purchase_time: timestamp("purchase_time").defaultNow().notNull(),
+  qrCode: text("qr_code").notNull(),
+  createdAt: timestamp("created_at", {
+    mode: "date",
+    precision: 3,
+  })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", {
+    mode: "date",
+    precision: 3,
+  }).notNull(),
 });

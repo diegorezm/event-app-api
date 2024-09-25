@@ -52,6 +52,7 @@ export class AuthService implements IAuthService {
     const token = await this.tokenUtils.sign({
       email: user.email,
       type: "login",
+      isAdmin: user.role === "Administrator",
     });
     return {
       user: toUserSafe(user),

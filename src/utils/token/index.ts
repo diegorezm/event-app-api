@@ -3,6 +3,7 @@ import { SECRET_KEY } from '../../env'
 
 export type TokenClaims = {
   email: string;
+  isAdmin: boolean;
   type: "login" | "email_verification" | "password_reset";
 };
 

@@ -1,9 +1,13 @@
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { userTableSchema } from "../../db/schema";
 import { z } from "zod";
 
+export const userSelectSchema = createSelectSchema(userTableSchema)
+
 export const userInsertSchema = createInsertSchema(userTableSchema, {
-  name: z.string({ required_error: "Nome é obrigatório" }),
+  name: z.string({ required_error: "Nome é obrigatório" }).min(3, {
+    message: "Nome tem que ter no minímo 3 caracteres",
+  }),
   email: z
     .string({ required_error: "E-mail é obrigatório" })
     .email("E-mail inválido"),

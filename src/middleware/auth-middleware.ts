@@ -1,33 +1,35 @@
 import { Context, Next } from "hono";
 import { HTTPException } from "hono/http-exception";
-import tokenUtils from "../utils/token";
+import tokenUtils, { TokenClaims } from "../utils/token";
+import { UnauthorizedError } from "../types";
 
-export const authMiddleware = async (c: Context, next: Next) => {
+const getTokenFromHeader = async (c: Context) => {
   const headerToken = c.req.header("Authorization") || "";
   if (headerToken === "") {
-    throw new HTTPException(401, {
-      message: "Authorization header is missing.",
-    });
+    throw new UnauthorizedError("Authorization header is missing.");
   }
-  try {
-    const jwt = headerToken.split(" ")[1];
-    if (!jwt) {
-      throw new HTTPException(401, { message: "JWT token is missing." });
-    }
-    const tokenData = await tokenUtils.verify(jwt);
+  return headerToken.split(" ")[1];
+};
 
-    if (!tokenData) {
-      throw new HTTPException(401, { message: "Invalid token." });
+export const authMiddleware = async (c: Context, next: Next) => {
+  try {
+    const token = await getTokenFromHeader(c);
+    const jwt = await tokenUtils.verify(token);
+    c.set("jwtPayload", jwt);
+    await next();
+  } catch (error) {
+    if (error instanceof HTTPException) {
+      throw error;
     }
-    c.set("jwtPayload", tokenData);
-  } catch (e: unknown) {
-    if (e instanceof HTTPException) {
-      throw e;
-    }
-    throw new HTTPException(500, {
-      message: "Internal server error.",
-      cause: e,
-    });
+    throw new UnauthorizedError("Invalid or expired token.");
+  }
+};
+
+export const adminMiddleware = async (c: Context, next: Next) => {
+  const jwtPayload = c.get("jwtPayload") as TokenClaims;
+
+  if (!jwtPayload || !jwtPayload.isAdmin) {
+    throw new UnauthorizedError("You are not authorized to access this resource.");
   }
   await next();
 };

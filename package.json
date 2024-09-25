@@ -3,6 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "docs": "tsx watch src/docs/index.ts",
     "build": "tsup src",
     "start:prod": "npm run build && NODE_ENV=production node dist/index.cjs",
     "start:dev": "NODE_ENV=dev --env-file=.env dist/index.cjs",
