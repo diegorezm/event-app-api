@@ -1,9 +1,11 @@
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { EventDTO, Event } from "../models/events";
-import { eventsTableSchema } from "../db/schema";
-import { desc, eq, sql } from "drizzle-orm";
-import { PaginatedRequest, PaginatedResponse } from "../types";
+import {type NodePgDatabase} from "drizzle-orm/node-postgres";
+import {EventDTO, Event} from "../models/events";
+import {eventsTableSchema} from "../db/schema";
+import {desc, eq, sql} from "drizzle-orm";
+import {PaginatedRequest, PaginatedResponse} from "../types";
 import lower from "../utils/db/lower";
+import {inject, injectable} from "inversify";
+import {DI_SYMBOLS} from "../di/types";
 
 export interface IEventRepository {
   findById(id: string): Promise<Event | null>
@@ -13,8 +15,9 @@ export interface IEventRepository {
   delete(id: string): Promise<void>
 }
 
+@injectable()
 export class EventRepository implements IEventRepository {
-  constructor(private readonly db: NodePgDatabase) { }
+  constructor(@inject(DI_SYMBOLS.NodePgDatabase) private readonly db: NodePgDatabase) {}
 
   async findById(id: string): Promise<Event | null> {
     const [event] = await this.db.select().from(eventsTableSchema).where(eq(eventsTableSchema.id, id))
@@ -22,8 +25,8 @@ export class EventRepository implements IEventRepository {
   }
 
   async findAll(params: PaginatedRequest): Promise<PaginatedResponse<Event>> {
-    const { page = 1, pageSize = 10, q } = params
-    const offset = (page - 1) * pageSize;
+    const {page = 1, size = 10, q} = params
+    const offset = (page - 1) * size;
 
     const query = this.db.select().from(eventsTableSchema)
 
@@ -31,13 +34,13 @@ export class EventRepository implements IEventRepository {
       query.where(sql`${lower(eventsTableSchema.title)} LIKE ${`%${q.toLowerCase}%`}`)
     }
 
-    const sizeOfTable = await this.db.select({ count: sql<number>`count(*) over()` })
+    const sizeOfTable = await this.db.select({count: sql<number>`count(*)`})
       .from(query.as("filtered"))
       .limit(1)
-    const numberOfPages = Math.ceil(sizeOfTable[0].count / pageSize)
+    const numberOfPages = Math.ceil(sizeOfTable[0].count / size)
 
     const events = await query
-      .limit(pageSize)
+      .limit(size)
       .offset(offset)
       .orderBy(desc(eventsTableSchema.createdAt))
 
@@ -45,7 +48,7 @@ export class EventRepository implements IEventRepository {
       data: events,
       total: numberOfPages,
       page,
-      pageSize,
+      pageSize: size
     }
   }
 

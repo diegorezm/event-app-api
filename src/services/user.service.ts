@@ -1,6 +1,8 @@
-import { toUserSafe, User, UserDTO, UserSafe } from "../models/user";
-import { IUserRepository } from "../repositories/user.repository";
-import { InternalServerError, NotFoundError } from "../types";
+import {inject, injectable} from "inversify";
+import {toUserSafe, User, UserDTO, UserSafe} from "../models/user";
+import {IUserRepository} from "../repositories/user.repository";
+import {InternalServerError, NotFoundError} from "../types";
+import {DI_SYMBOLS} from "../di/types";
 
 export interface IUserService {
   getByEmail(email: string): Promise<UserSafe>;
@@ -9,8 +11,9 @@ export interface IUserService {
   delete(id: string): Promise<void>;
 }
 
+@injectable()
 class UserService implements IUserService {
-  constructor(private readonly userRepository: IUserRepository) { }
+  constructor(@inject(DI_SYMBOLS.IUserRepository) private readonly userRepository: IUserRepository) {}
 
   async getByEmail(email: string): Promise<UserSafe> {
     const user = await this.userRepository.findByEmail(email);

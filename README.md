@@ -11,6 +11,7 @@
 - `src/services/`: gets data from the database via repository and sends to the controller
 - `src/routes/`: where the routes are defined
 - `src/utils/`: utilities that are used in different parts of the project
+- `src/di`: Dependency injection
 
 ### Setup
 

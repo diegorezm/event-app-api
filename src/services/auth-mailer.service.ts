@@ -1,7 +1,9 @@
-import { ForbiddenError } from "../types";
+import {inject, injectable} from "inversify";
+import {ForbiddenError} from "../types";
 import sendEmail from "../utils/mail";
-import { IOtpService } from "./otp.service";
-import { IUserService } from "./user.service";
+import {IOtpService} from "./otp.service";
+import {IUserService} from "./user.service";
+import {DI_SYMBOLS} from "../di/types";
 
 const mailTemplate = ({
   title,
@@ -37,8 +39,13 @@ export interface IAuthMailerService {
   resetPassword(token: string, email: string, newPassword: string): Promise<void>;
 }
 
+@injectable()
 export class AuthMailerService implements IAuthMailerService {
-  constructor(private readonly otpService: IOtpService, private readonly userService: IUserService) { }
+  constructor(
+    @inject(DI_SYMBOLS.IOTPService)
+    private readonly otpService: IOtpService,
+    @inject(DI_SYMBOLS.IUserService)
+    private readonly userService: IUserService) {}
 
   async sendEmailVerification(email: string): Promise<void> {
     const user = await this.userService.getByEmail(email);

@@ -1,14 +1,10 @@
-import { Hono } from "hono";
-import db from "../db";
-import { EventRepository } from "../repositories/event.repository";
-import { EventService } from "../services/event.service";
-import { zValidator } from "@hono/zod-validator";
-import { paginatedRequestSchema } from "../types";
+import {Hono} from "hono";
+import {zValidator} from "@hono/zod-validator";
+import {paginatedRequestSchema} from "../types";
+import {getInjection} from "../di/container";
 
-const eventsRepository = new EventRepository(db);
-const eventsService = new EventService(eventsRepository);
-
-const routes = new Hono().basePath("/events");
+const eventsService = getInjection("IEventService");
+const routes = new Hono();
 
 routes.get("/", zValidator("query", paginatedRequestSchema), async (c) => {
   const paginatedRequest = c.req.valid("query");

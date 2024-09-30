@@ -1,4 +1,4 @@
-import { HTTPException } from "hono/http-exception";
+import {HTTPException} from "hono/http-exception";
 import {
   UserOtp,
   UserOtpDTO,
@@ -6,9 +6,11 @@ import {
   UserOtpStatus,
 } from "../models/user/otp";
 import crypto from "../utils/crypto";
-import { IOtpRepository } from "../repositories/otp.repository";
-import { IUserRepository } from "../repositories/user.repository";
-import { ForbiddenError, InternalServerError, NotFoundError } from "../types";
+import {IOtpRepository} from "../repositories/otp.repository";
+import {IUserRepository} from "../repositories/user.repository";
+import {ForbiddenError, InternalServerError, NotFoundError} from "../types";
+import {inject, injectable} from "inversify";
+import {DI_SYMBOLS} from "../di/types";
 
 type GetOtpParams = {
   id: number;
@@ -39,10 +41,15 @@ export interface IOtpService {
   verify(params: VerifyOtpParams): Promise<boolean>;
 }
 
+@injectable()
 export default class OtpService implements IOtpService {
   private readonly EXPIRATION_TIME = 15 * 60 * 1000;
 
-  constructor(private readonly otpRepository: IOtpRepository, private readonly userRepository: IUserRepository) { }
+  constructor(
+    @inject(DI_SYMBOLS.IOtpRepository)
+    private readonly otpRepository: IOtpRepository,
+    @inject(DI_SYMBOLS.IUserRepository)
+    private readonly userRepository: IUserRepository) {}
 
   // generate otp code, encrypt and return
   private generateOtpCode() {

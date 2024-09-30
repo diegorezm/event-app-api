@@ -1,7 +1,9 @@
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
-import { UserOtp, UserOtpDTO, UserOtpOperation, UserOtpStatus } from "../models/user/otp";
-import { userOtpSchema } from "../db/schema";
-import { and, eq, or, sql } from "drizzle-orm";
+import {NodePgDatabase} from "drizzle-orm/node-postgres";
+import {UserOtp, UserOtpDTO, UserOtpOperation, UserOtpStatus} from "../models/user/otp";
+import {userOtpSchema} from "../db/schema";
+import {and, eq, or, sql} from "drizzle-orm";
+import {inject, injectable} from "inversify";
+import {DI_SYMBOLS} from "../di/types";
 
 type GetOtpParams = {
   id: number;
@@ -26,8 +28,9 @@ export interface IOtpRepository {
   deleteAll(): Promise<void>;
 }
 
+@injectable()
 export default class OtpRepository implements IOtpRepository {
-  constructor(private readonly db: NodePgDatabase) { }
+  constructor(@inject(DI_SYMBOLS.NodePgDatabase) private readonly db: NodePgDatabase) {}
 
   async getById(params: GetOtpParams): Promise<UserOtp | undefined> {
     const conditions = [
@@ -74,7 +77,7 @@ export default class OtpRepository implements IOtpRepository {
   }
 
   async updateStatus(id: number, status: UserOtpStatus): Promise<UserOtp> {
-    const [otp] = await this.db.update(userOtpSchema).set({ status }).where(eq(userOtpSchema.id, id)).returning();
+    const [otp] = await this.db.update(userOtpSchema).set({status}).where(eq(userOtpSchema.id, id)).returning();
     return otp;
   }
 

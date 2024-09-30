@@ -1,20 +1,23 @@
-import { toUserSafe, UserDTO, UserLoginDTO, UserSafe } from "../models/user";
-import { HTTPException } from "hono/http-exception";
+import {toUserSafe, UserDTO, UserLoginDTO, UserSafe} from "../models/user";
+import {HTTPException} from "hono/http-exception";
 import crypto from "../utils/crypto";
 
-import { IUserRepository } from "../repositories/user.repository";
-import { ConflictError, InternalServerError, NotFoundError, UnauthorizedError } from "../types";
+import {IUserRepository} from "../repositories/user.repository";
+import {ConflictError, InternalServerError, NotFoundError, UnauthorizedError} from "../types";
 import TokenUtils from "../utils/token";
+import {inject, injectable} from "inversify";
+import {DI_SYMBOLS} from "../di/types";
 
-type IAuthService = {
+export interface IAuthService {
   passwordReset: (token: string, password: string) => Promise<void>;
   register: (payload: UserDTO) => Promise<UserSafe>;
-  login: (payload: UserLoginDTO) => Promise<{ user: UserSafe; token: string }>;
+  login: (payload: UserLoginDTO) => Promise<{user: UserSafe; token: string}>;
 };
 
+@injectable()
 export class AuthService implements IAuthService {
   private readonly tokenUtils: typeof TokenUtils;
-  constructor(private readonly userRepository: IUserRepository) {
+  constructor(@inject(DI_SYMBOLS.IUserRepository) private readonly userRepository: IUserRepository) {
     this.tokenUtils = TokenUtils;
   }
 
@@ -70,6 +73,6 @@ export class AuthService implements IAuthService {
       throw new NotFoundError("Usuário não encontrado");
     }
     const hash = crypto.encrypt(password);
-    await this.userRepository.update({ password: hash }, user.id);
+    await this.userRepository.update({password: hash}, user.id);
   }
 }

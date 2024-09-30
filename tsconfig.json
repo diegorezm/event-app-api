@@ -10,10 +10,14 @@
     "skipLibCheck": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "jsx": "react",
     "jsxFactory": "jsx",
-    "jsxFragmentFactory": "Fragment"
+    "jsxFragmentFactory": "Fragment",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": [
     "src/**/*.ts",

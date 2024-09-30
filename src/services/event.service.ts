@@ -1,8 +1,10 @@
-import { EventDTO, Event } from "../models/events";
-import { IEventRepository } from "../repositories/event.repository";
-import { NotFoundError, PaginatedRequest, PaginatedResponse } from "../types";
+import {inject, injectable} from "inversify";
+import {EventDTO, Event} from "../models/events";
+import {IEventRepository} from "../repositories/event.repository";
+import {NotFoundError, PaginatedRequest, PaginatedResponse} from "../types";
+import {DI_SYMBOLS} from "../di/types";
 
-interface IEventService {
+export interface IEventService {
   findAll(params: PaginatedRequest): Promise<PaginatedResponse<Event>>;
   findById(id: string): Promise<Event>;
   create(event: EventDTO): Promise<Event>;
@@ -10,8 +12,9 @@ interface IEventService {
   delete(id: string): Promise<void>;
 }
 
+@injectable()
 export class EventService implements IEventService {
-  constructor(private readonly eventRepository: IEventRepository) {}
+  constructor(@inject(DI_SYMBOLS.IEventRepository) private readonly eventRepository: IEventRepository) {}
   async findAll(params: PaginatedRequest): Promise<PaginatedResponse<Event>> {
     const events = await this.eventRepository.findAll(params);
     return events;

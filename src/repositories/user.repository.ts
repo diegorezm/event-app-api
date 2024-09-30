@@ -1,7 +1,9 @@
-import { eq, inArray } from "drizzle-orm";
-import { userTableSchema } from "../db/schema";
-import { User, UserDTO } from "../models/user";
-import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import {eq, inArray} from "drizzle-orm";
+import {userTableSchema} from "../db/schema";
+import {User, UserDTO} from "../models/user";
+import {NodePgDatabase} from "drizzle-orm/node-postgres";
+import {inject, injectable} from "inversify";
+import {DI_SYMBOLS} from "../di/types";
 
 
 export interface IUserRepository {
@@ -13,8 +15,9 @@ export interface IUserRepository {
   bulkDelete(ids: string[]): Promise<void>;
 }
 
+@injectable()
 export default class UserRepository implements IUserRepository {
-  constructor(private readonly db: NodePgDatabase) { }
+  constructor(@inject(DI_SYMBOLS.NodePgDatabase) private readonly db: NodePgDatabase) {}
   async findByEmail(email: string): Promise<User | null> {
     const [user] = await this.db.select().from(userTableSchema).where(eq(userTableSchema.email, email));
     return user;
